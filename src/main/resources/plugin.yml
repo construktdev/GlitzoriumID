@@ -1,0 +1,10 @@
+name: GlitzoriumLink
+version: '1.0.0'
+main: de.construkter.glitzoriumLink.GlitzoriumLink
+api-version: '1.21'
+
+commands:
+  verify:
+    description: Verknüpfe Minecraft mit Discord
+    usage: /verify <code>
+    aliases: ["connectdc", "discord"]
