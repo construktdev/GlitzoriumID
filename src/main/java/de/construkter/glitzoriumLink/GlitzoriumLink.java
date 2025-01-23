@@ -28,7 +28,6 @@ public final class GlitzoriumLink extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
         jda = JDABuilder.createDefault(Env.TOKEN, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
                 .setActivity(Activity.listening("/auth"))
                 .addEventListeners(new SlashCommands())
@@ -40,15 +39,9 @@ public final class GlitzoriumLink extends JavaPlugin {
             glitzorium = tempRole.getGuild();
         }
 
-
         if (glitzorium != null) {
             glitzorium.upsertCommand(Commands.slash("auth", "Verknüpfe Minecraft mit Discord").addOption(OptionType.STRING, "name", "Dein Minecraft Name (Bedrock: Mit Punkt davor)")).queue();
-        } else {
-            jda.updateCommands().addCommands(
-                    Commands.slash("auth", "Verknüpfe Minecraft mit Discord")
-                            .addOption(OptionType.STRING, "name", "Dein Minecraft Name (Bedrock: Mit Punkt davor)")
-                            .setGuildOnly(true)
-            ).queue();
+            glitzorium.upsertCommand(Commands.slash("clear-cache", "Setze den Verifikations Cache zurück")).queue();
         }
 
         LinkingAPI.playerCodes = new HashMap<>();
@@ -59,8 +52,12 @@ public final class GlitzoriumLink extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
         jda.shutdown();
+    }
+
+    @Override
+    public void onLoad() {
+        getLogger().info("Loading GlitzoriumLink...");
     }
 
     public static void handleConnectionSuccess(String minecraftName) {
@@ -69,7 +66,7 @@ public final class GlitzoriumLink extends JavaPlugin {
         if (user != null) {
             user.openPrivateChannel().queue((channel) -> {
                 EmbedBuilder embed = new EmbedBuilder()
-                        .setTitle("Erfolgreich verknüpft!")
+                        .setTitle("Erfolgreich verifiziert!")
                         .setDescription("Du hast deinen Minecraft Account `" + minecraftName + "` erfolgreich mit deinem Discord Account verknüpft!")
                         .setThumbnail("https://cdn.construkter.de/success.png")
                         .setFooter("Glitzorium ID", "https://cdn.construkter.de/glitzorium.png")

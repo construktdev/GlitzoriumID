@@ -3,7 +3,9 @@ package de.construkter.glitzoriumLink.discord;
 import de.construkter.glitzoriumLink.api.LinkingAPI;
 import de.construkter.glitzoriumLink.utils.Env;
 import de.construkter.glitzoriumLink.utils.ErrorCreator;
+import de.construkter.glitzoriumLink.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -17,6 +19,7 @@ public class SlashCommands extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getName().equals("auth")) handleAuthCommand(event);
+        if (event.getName().equals("clear-cache")) handleClearCache(event);
     }
 
     private void handleAuthCommand(SlashCommandInteractionEvent event) {
@@ -25,6 +28,7 @@ public class SlashCommands extends ListenerAdapter {
         boolean isLinked = Objects.requireNonNull(event.getMember()).getRoles().contains(event.getJDA().getRoleById(Env.LINKED_ID));
         if (isLinked) {
             event.replyEmbeds(ErrorCreator.createError("- Internal: Du bist bereits verknüpft!")).setEphemeral(true).queue();
+            return;
         }
         var option = event.getOption("name");
         if (option == null) {
@@ -52,5 +56,16 @@ public class SlashCommands extends ListenerAdapter {
                 .setColor(Color.GREEN);
 
         event.replyEmbeds(successEmbed.build()).setEphemeral(true).queue();
+    }
+
+    public void handleClearCache(SlashCommandInteractionEvent event) {
+        if (Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
+            event.reply("<:guild_loading:1311415474172592168> • Loading...").setEphemeral(true).queue(message -> {
+                Utils.sleep(2345);
+                LinkingAPI.playerCodes.clear();
+                LinkingAPI.playerNames.clear();
+                message.editOriginal("<:guild_icon_verified:1116802905060671498> • All Cache was cleared!").queue();
+            });
+        }
     }
 }
